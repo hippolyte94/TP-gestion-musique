@@ -13,9 +13,7 @@ public class Musique extends Audio implements  Comparable<Musique>{
     }
 
     public boolean isInAnAlbum(){
-        if (albumId == null)
-                return false;
-        return true;
+        return albumId != null;
     }
 
     public Genre getGenre() {

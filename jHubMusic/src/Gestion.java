@@ -17,6 +17,7 @@ public class Gestion implements Serializable{
     private ArrayList<String> playList;
     private Set<Musique> listMusiques;
     private ArrayList<Album> listAlbums;
+    private ArrayList<LivreAudio> listLivreAudio;
     private Map<UUID, ArrayList<UUID>> multimap;
 
     public Gestion (){
@@ -43,9 +44,9 @@ public class Gestion implements Serializable{
         Genre genre;
         UUID albumId;
         // Remplie la liste des musiques apres avoir traité chaque ligne.
-        for (int i = 0; i < musique.size(); i++) {
+        for (String s : musique) {
 
-            String[] temp = musique.get(i).split(";");
+            String[] temp = s.split(";");
             String[] artistesTemp = temp[1].split(",");
 
             artistes.addAll(Arrays.asList(artistesTemp));
@@ -54,7 +55,7 @@ public class Gestion implements Serializable{
             id = UUID.fromString(temp[3]);
             genre = Genre.valueOf(temp[4].toUpperCase());
             albumId = UUID.fromString(temp[5]);
-            Musique musiccTemp = new Musique(titre,artistes,duree,id,genre,albumId);
+            Musique musiccTemp = new Musique(titre, artistes, duree, id, genre, albumId);
             listMusiques.add(musiccTemp);
         }
 
@@ -69,8 +70,8 @@ public class Gestion implements Serializable{
         UUID id;
         Set<Musique> tempList = listMusiques;
 
-        for(int i = 0; i < this.album.size(); i++) {
-            String[] temp = album.get(i).split(";");
+        for (String s : this.album) {
+            String[] temp = s.split(";");
             String[] artistesTemp = temp[2].split(",");
 
             id = UUID.fromString(temp[0]);
@@ -79,23 +80,84 @@ public class Gestion implements Serializable{
             duree = Long.parseLong(temp[3]);
             try {
                 date = new SimpleDateFormat("dd/MM/yyyy").parse(temp[4]);
-            }catch (Exception e){
+            } catch (Exception e) {
                 System.out.println(e);
             }
 
             Iterator<Musique> iterator = tempList.iterator();
-            while (iterator.hasNext()){
+            while (iterator.hasNext()) {
                 Musique tmp = iterator.next();
-                if(tmp.isInAnAlbum() && tmp.getAlbumId().compareTo(id) == 0) {
+                if (tmp.isInAnAlbum() && tmp.getAlbumId().compareTo(id) == 0) {
                     listMusique.add(tmp);
                     iterator.remove();
                 }
             }
 
-            Album tempAlbum = new Album(titre,artistes,duree,date,listMusique,id);
+            Album tempAlbum = new Album(titre, artistes, duree, date, listMusique, id);
             listAlbums.add(tempAlbum);
         }
 
+    }
+
+    private void gestionLivreAudio(){
+        String titre;
+        ArrayList<String> artistes = new ArrayList<>();
+        long duree;
+        UUID id;
+        Cathegorie cath;
+        Langue langue;
+        String[] tmp;
+        String[] tmpArtiste;
+        for (String s : livreAudio) {
+            tmp = s.split(";");
+            tmpArtiste = tmp[2].split(",");
+
+            id = UUID.fromString(tmp[0]);
+            titre = tmp[1];
+            artistes.addAll(Arrays.asList(tmpArtiste));
+            duree = Long.parseLong(tmp[3]);
+            cath = Cathegorie.valueOf(tmp[4].toUpperCase());
+            langue = Langue.valueOf(tmp[5].toUpperCase());
+
+            listLivreAudio.add(new LivreAudio(titre, artistes, duree, langue, cath, id));
+        }
+    }
+
+    private void gestionPlayList(){
+
+        String nom;
+        ArrayList<Audio> listeAudio = new ArrayList<>();
+        UUID id;
+
+        String[] tmp;
+
+        for (String s : playList){
+            tmp = s.split(";");
+
+            switch (tmp[0])
+            {
+                case "musique":
+                    for (Musique m: listMusiques) {
+                        if (m.getId().compareTo(UUID.fromString(tmp[1])) == 0){
+                            listeAudio.add(m);
+                        }
+                    }
+                    break;
+
+                case "livreaudio":
+                    for (LivreAudio l: listLivreAudio) {
+                        if (l.getId().compareTo(UUID.fromString(tmp[1])) == 0){
+                            listeAudio.add(l);
+                        }
+                    }
+                    break;
+
+                default:
+                    System.out.println("type d'audio non défini");
+                    break;
+            }
+
+        }
     }
 
     private ArrayList<String> fileReader(String path){
@@ -164,6 +226,13 @@ public class Gestion implements Serializable{
 
             }
         return result;
+    }
+
+    public boolean sauvegarde(ArrayList<Musique> music, ArrayList<LivreAudio> lAudio,ArrayList<PlayList> pList,ArrayList<Album> albumes){
+
+
+
+        return true;
     }
 
     public ArrayList<String> getMusique() {
